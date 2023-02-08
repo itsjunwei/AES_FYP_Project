@@ -31,7 +31,6 @@ byte key[32] = {0x52, 0x66, 0x55, 0x6a,
 void setup() {
     Serial.begin(9600);
     pinMode(11, OUTPUT);
-    Serial.flush();
 }
 
 //Nr-The number of round encrypted (AES-128 10 rounds, AES-192 12 rounds, AES-256 14 rounds)
@@ -312,97 +311,78 @@ void encrypt(byte in[16], uint32_t w[4 * (14 + 1)])
 
 
 /************* Plaintext, Ciphertext storage definitions **************/
-// Change loop count as needed for how many loops wanted 
-int loopCount = 200;
-byte plainArray[200][16];
-byte cipherArray[200][16];
 
 
 void loop() {
-    if (Serial.available() > 0){
 
-        // encrypt rounds equal to loopCount
-        for (int loopCounter = 0; loopCounter < loopCount; loopCounter++) {
+    // Wait until data is available
+    while (Serial.available() == 0){
+    }
 
-            // read the incoming string
-            incomingByte = Serial.readStringUntil('\n');
+    incomingByte = Serial.readStringUntil('\n');
 
-            // Convert the String into Bytes
-            incomingByte.getBytes(buf, 17);
-
-            // Extract the plaintext before Encryption
-            for (int i=0; i < 16; i++) {
-              plaintext[i] = buf[i];
-            }
-
-            // Key Expansion
-            uint32_t w[4 * (Nr + 1)];
-            KeyExpansion(key, w);
-
-            // Encryption Starts on Pin 11 HIGH
-            digitalWrite(11, HIGH);
-
-            // Perform Encryption on 16 Bytes buf
-            encrypt(buf, w);
-
-            // Encryption Ends on Pin 11 LOW
-            digitalWrite(11, LOW);
-
-            // Print the plaintext for checking
-            for (int a = 0; a < 16; a++) {
-              // Store plaintext into storage array
-              plainArray[loopCounter][a] = plaintext[a];
-            }
-
-            // Print the ciphertext for checking
-            for (int b = 0; b < 16; b++) {
-              // Store ciphertext into storage array
-              cipherArray[loopCounter][b] = buf[b];
-            }
-
-        }
-        
-        // print the key data once
-        Serial.print("K");
-        Serial.print(" ");
-        for (int k = 0; k < 32; k++) {
+    if (incomingByte == "off"){
+        // Encryption Ends on Pin 11 LOW
+        digitalWrite(11, LOW);
+    }
+    if (incomingByte == "key"){
+        // Print the Key
+        Serial.print('K');
+        Serial.print(' ');
+        for (int i=0; i<32; i++){
             char charVal[2];
-            sprintf(charVal, "%02X", key[k]);
+            sprintf(charVal, "%02X", key[i]);
+            Serial.print(charVal);
+            Serial.print(' ');
+        }
+        Serial.print('\n');
+        Serial.println('\n');
+    }
+    else{
+
+        // Convert String into Byte Array
+        incomingByte.getBytes(buf, 17);
+
+        // Extract Plaintext
+        for (int i = 0; i<16; i++){
+            plaintext[i] = buf[i];
+        }
+
+        // Key Expansion
+        uint32_t w[4 * (Nr + 1)];
+        KeyExpansion(key, w);
+
+        // Encryption Starts on Pin 11 HIGH
+        digitalWrite(11, HIGH);
+
+        // Perform Encryption on 16 Bytes buf
+        encrypt(buf, w);
+
+        // Encryption Ends on Pin 11 LOW
+        digitalWrite(11, LOW);
+
+        // Print Plaintext
+        Serial.print('P');
+        Serial.print(' ');
+        for (int i=0; i<16; i++){
+            char charVal[2];
+            sprintf(charVal, "%02X", plaintext[i]);
             Serial.print(charVal);
             Serial.print(' ');
         }
         Serial.print('\n');
 
-        // output text data
-        for (int j = 0; j < loopCount; j++) {
-
-            // output plaintext data
-            Serial.print('P');
+        // Print Ciphertext
+        Serial.print('C');
+        Serial.print(' ');
+        for (int i=0; i<16; i++){
+            char charVal[2];
+            sprintf(charVal, "%02X", buf[i]);
+            Serial.print(charVal);
             Serial.print(' ');
-            for (int x = 0; x < 16; x++) {
-                char charVal[2];
-                sprintf(charVal, "%02X", plainArray[j][x]);
-                Serial.print(charVal);
-                Serial.print(' ');
-            }
-            Serial.print('\n');
-
-            // output ciphertext data
-            Serial.print('C');
-            Serial.print(' ');
-            for (int y = 0; y < 16; y++) {
-                char charVal[2];
-                sprintf(charVal, "%02X", cipherArray[j][y]);
-                Serial.print(charVal);
-                Serial.print(' ');
-            }
-            Serial.print('\n');
         }
-    
-        // EOF indicator
-        Serial.println('\n');
-        Serial.flush();
-    }
+        Serial.print('\n');
 
-  }
-  
+        Serial.println('\n');
+    }
+} 

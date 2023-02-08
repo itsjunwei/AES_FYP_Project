@@ -7,7 +7,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import win32com.client  # import the pywin32 library
 
-from classes import Singleton
+# from classes import Singleton
+
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
 class Lecroy(metaclass=Singleton):

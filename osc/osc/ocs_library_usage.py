@@ -1,3 +1,8 @@
+from osc_library import Lecroy
+import numpy
+
+lecroy_interface = Lecroy()
+
 OSC_IP_ADDRESS = '192.168.0.196'
 CHANNEL = 'C1'
 
