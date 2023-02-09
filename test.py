@@ -1,7 +1,7 @@
-with open('plaintext.txt') as f:
+with open('./data/plaintext.txt') as f:
     seen = set()
     for line in f:
-        line_lower = line.lower()
+        line_lower = line.lower().strip()
         if line_lower in seen:
             print(line)
         else:

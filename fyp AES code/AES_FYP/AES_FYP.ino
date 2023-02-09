@@ -1,6 +1,6 @@
 String incomingByte;
 byte buf[16];
-byte plaintext[16];
+// byte plaintext[16];
 using namespace std;
 typedef uint8_t byte; //uint32_t
 
@@ -30,6 +30,7 @@ byte key[32] = {0x52, 0x66, 0x55, 0x6a,
 // Setup Code
 void setup() {
     Serial.begin(9600);
+    // initialize digital pin 11 as an output
     pinMode(11, OUTPUT);
 }
 
@@ -60,6 +61,13 @@ byte S_Box[16][16] = {
 
 
 //Round constant, used in key expansion. (AES-128 10 rounds, AES-192 12 rounds, AES-256 14 rounds)
+
+// AES-128 10 Rounds
+// uint32_t Rcon[10] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
+//                      0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x24000000
+//                      };
+
+// AES-256 14 Rounds
 uint32_t Rcon[14] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
                      0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x24000000,
                      0x36000000, 0x48000000, 0x60000000, 0x7b000000
@@ -310,22 +318,24 @@ void encrypt(byte in[16], uint32_t w[4 * (14 + 1)])
 }
 
 
-/************* Plaintext, Ciphertext storage definitions **************/
-
-
 void loop() {
 
     // Wait until data is available
     while (Serial.available() == 0){
     }
 
+    // Reading incoming string
     incomingByte = Serial.readStringUntil('\n');
 
+    // Terminate Encryption
     if (incomingByte == "off"){
         // Encryption Ends on Pin 11 LOW
         digitalWrite(11, LOW);
     }
+
+    // Extract Key
     if (incomingByte == "key"){
+
         // Print the Key
         Serial.print('K');
         Serial.print(' ');
@@ -338,15 +348,26 @@ void loop() {
         Serial.print('\n');
         Serial.println('\n');
     }
+
+    // General Encryption
     else{
 
         // Convert String into Byte Array
         incomingByte.getBytes(buf, 17);
 
         // Extract Plaintext
-        for (int i = 0; i<16; i++){
-            plaintext[i] = buf[i];
+//        for (int i = 0; i<16; i++){
+//            plaintext[i] = buf[i];
+//        }
+        Serial.print('P');
+        Serial.print(' ');
+        for (int i=0; i<16; i++){
+            char charVal[2];
+            sprintf(charVal, "%02X", buf[i]);
+            Serial.print(charVal);
+            Serial.print(' ');
         }
+        Serial.print('\n');
 
         // Key Expansion
         uint32_t w[4 * (Nr + 1)];
@@ -361,17 +382,6 @@ void loop() {
         // Encryption Ends on Pin 11 LOW
         digitalWrite(11, LOW);
 
-        // Print Plaintext
-        Serial.print('P');
-        Serial.print(' ');
-        for (int i=0; i<16; i++){
-            char charVal[2];
-            sprintf(charVal, "%02X", plaintext[i]);
-            Serial.print(charVal);
-            Serial.print(' ');
-        }
-        Serial.print('\n');
-
         // Print Ciphertext
         Serial.print('C');
         Serial.print(' ');
@@ -382,7 +392,7 @@ void loop() {
             Serial.print(' ');
         }
         Serial.print('\n');
-
+        Serial.flush();
         Serial.println('\n');
     }
 } 

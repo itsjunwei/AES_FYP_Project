@@ -22,7 +22,7 @@ serialcomm = serial.Serial('COM5', 9600)
 serialcomm.timeout = 1
 
 # Loop Counter
-loopCount = 10
+loopCount = 2000
 
 # Time checker
 startTime = time.time()
@@ -33,6 +33,7 @@ startTime = time.time()
 try: 
     i = "key\n"
     serialcomm.write(i.encode())
+    serialcomm.flush()
     while True:
         keyLine = serialcomm.read_until()
         keyMessage = keyLine.decode()
@@ -74,9 +75,11 @@ for counter in range(0,loopCount):
             
             else:
                 if message.startswith("P"):
-                    plainFile.write(message[2:])
+                    plainFile.write(message.strip()[2:])
+                    plainFile.write('\n')
                 elif message.startswith("C"):
-                    cipherFile.write(message[2:])
+                    cipherFile.write(message.strip()[2:])
+                    cipherFile.write('\n')
 
     except KeyboardInterrupt:
         i = 'off'
