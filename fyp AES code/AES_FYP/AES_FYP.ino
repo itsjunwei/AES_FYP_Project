@@ -1,6 +1,6 @@
 String incomingByte;
 byte buf[16];
-// byte plaintext[16];
+byte plaintext[16];
 using namespace std;
 typedef uint8_t byte; //uint32_t
 
@@ -10,22 +10,22 @@ typedef uint8_t byte; //uint32_t
 /*                                                                    */
 /**********************************************************************/
 
-/*
-  byte key[16] = {0x2b, 0x7e, 0x15, 0x16,
-                0x28, 0xae, 0xd2, 0xa6,
-                0xab, 0xf7, 0x15, 0x88,
-                0x09, 0xcf, 0x4f, 0x3c};  //AES-128
-*/
 
-byte key[32] = {0x52, 0x66, 0x55, 0x6a,
-                0x58, 0x6e, 0x32, 0x72,
-                0x35, 0x75, 0x37, 0x78,
-                0x21, 0x41, 0x25, 0x44,
-                0x2a, 0x47, 0x2d, 0x4b,
-                0x61, 0x50, 0x64, 0x53,
-                0x67, 0x56, 0x6b, 0x59,
-                0x70, 0x33, 0x53, 0x56
-               }; //AES-256
+byte key[16] = {0x2b, 0x7e, 0x15, 0x16,
+            0x28, 0xae, 0xd2, 0xa6,
+            0xab, 0xf7, 0x15, 0x88,
+            0x09, 0xcf, 0x4f, 0x3c};  //AES-128
+
+
+// byte key[32] = {0x52, 0x66, 0x55, 0x6a,
+//                 0x58, 0x6e, 0x32, 0x72,
+//                 0x35, 0x75, 0x37, 0x78,
+//                 0x21, 0x41, 0x25, 0x44,
+//                 0x2a, 0x47, 0x2d, 0x4b,
+//                 0x61, 0x50, 0x64, 0x53,
+//                 0x67, 0x56, 0x6b, 0x59,
+//                 0x70, 0x33, 0x53, 0x56
+//                }; //AES-256
 
 // Setup Code
 void setup() {
@@ -36,8 +36,8 @@ void setup() {
 
 //Nr-The number of round encrypted (AES-128 10 rounds, AES-192 12 rounds, AES-256 14 rounds)
 //Nk-The number of 32-bit words contained in the key (AES-128 4, AES-192 6, AES-256 8)
-const int Nr = 14;
-const int Nk = 8;
+const int Nr = 10;
+const int Nk = 4;
 
 
 byte S_Box[16][16] = {
@@ -63,15 +63,15 @@ byte S_Box[16][16] = {
 //Round constant, used in key expansion. (AES-128 10 rounds, AES-192 12 rounds, AES-256 14 rounds)
 
 // AES-128 10 Rounds
-// uint32_t Rcon[10] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
-//                      0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x24000000
-//                      };
+uint32_t Rcon[10] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
+                     0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x24000000
+                     };
 
-// AES-256 14 Rounds
-uint32_t Rcon[14] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
-                     0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x24000000,
-                     0x36000000, 0x48000000, 0x60000000, 0x7b000000
-                    };
+// // AES-256 14 Rounds
+// uint32_t Rcon[14] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
+//                      0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x24000000,
+//                      0x36000000, 0x48000000, 0x60000000, 0x7b000000
+//                     };
 
 
 /**********************************************************************/
@@ -259,9 +259,9 @@ uint32_t SubWord(uint32_t sw)
 */
 
 //void KeyExpansion(byte key[4*Nk], word w[4*(Nr+1)])
-void KeyExpansion(byte key[4 * 8], uint32_t w[4 * (10 + 1)]) // Change Nk / Nr for AES-256
+void KeyExpansion(byte key[4 * 4], uint32_t w[4 * (10 + 1)]) // Change Nk / Nr for AES-256
 //  Nr = 10,12,14
-//  Nk = 4,6,8
+//  Nk = 4 ,6 ,8
 {
     uint32_t temp;
     int i = 0;
@@ -290,7 +290,7 @@ void KeyExpansion(byte key[4 * 8], uint32_t w[4 * (10 + 1)]) // Change Nk / Nr f
     encryption
 */
 //void encrypt(byte in[4*4], word w[4*(Nr+1)])
-void encrypt(byte in[16], uint32_t w[4 * (14 + 1)])
+void encrypt(byte in[16], uint32_t w[4 * (10 + 1)])
 //  Nr = 10,12,14
 //  Nk = 4,6,8
 {
@@ -339,7 +339,7 @@ void loop() {
         // Print the Key
         Serial.print('K');
         Serial.print(' ');
-        for (int i=0; i<32; i++){
+        for (int i=0; i<16; i++){
             char charVal[2];
             sprintf(charVal, "%02X", key[i]);
             Serial.print(charVal);
@@ -356,9 +356,9 @@ void loop() {
         incomingByte.getBytes(buf, 17);
 
         // Extract Plaintext
-//        for (int i = 0; i<16; i++){
-//            plaintext[i] = buf[i];
-//        }
+       for (int i = 0; i<16; i++){
+           plaintext[i] = buf[i];
+       }
         Serial.print('P');
         Serial.print(' ');
         for (int i=0; i<16; i++){
@@ -372,7 +372,8 @@ void loop() {
         // Key Expansion
         uint32_t w[4 * (Nr + 1)];
         KeyExpansion(key, w);
-
+        delay(100);
+        
         // Encryption Starts on Pin 11 HIGH
         digitalWrite(11, HIGH);
 
@@ -381,6 +382,7 @@ void loop() {
 
         // Encryption Ends on Pin 11 LOW
         digitalWrite(11, LOW);
+        delay(200);
 
         // Print Ciphertext
         Serial.print('C');

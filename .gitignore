@@ -1,2 +1,5 @@
 data/
-osc/osc/__pycache__/.
+PYP/
+backup/
+SCA Toolkit/
+osc\osc
