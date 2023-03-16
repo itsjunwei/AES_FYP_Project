@@ -13,7 +13,7 @@ cipher = AES.new(key, AES.MODE_ECB)
 os.system('cls')
 
 # How many traces to collect
-loopCount = 10
+loopCount = 30
 
 
 # Filepath cleanup 
@@ -44,27 +44,27 @@ startTime = time.time()
 
 ## MAIN FUNCTION 
 
-# Extract Key
-try: 
-    i = "key\n"
-    serialcomm.write(i.encode())
-    serialcomm.flush()
-    while True:
-        keyLine = serialcomm.read_until()
-        keyMessage = keyLine.decode()
+# # Extract Key
+# try: 
+#     i = "key\n"
+#     serialcomm.write(i.encode())
+#     serialcomm.flush()
+#     while True:
+#         keyLine = serialcomm.read_until()
+#         keyMessage = keyLine.decode()
         
-        if keyMessage == "\n":
-            print("Key Extracted")
-            break
-        else:
-            keyFile.write(keyMessage[2:])
-except KeyboardInterrupt:
-    i = 'off'
-    serialcomm.write(i.encode())
-    print("\nEncryption Terminated")
+#         if keyMessage == "\n":
+#             print("Key Extracted")
+#             break
+#         else:
+#             keyFile.write(keyMessage[2:])
+# except KeyboardInterrupt:
+#     i = 'off'
+#     serialcomm.write(i.encode())
+#     print("\nEncryption Terminated")
     
-    # Close the serial port
-    serialcomm.close()
+#     # Close the serial port
+#     serialcomm.close()
 
 
 # Encrypt and Extract Plaintext and Ciphertext            
@@ -90,18 +90,31 @@ for counter in range(loopCount):
             
             eachLine = serialcomm.read_until()
             message = eachLine.decode()
-
-            if message == '\n':
-                print(f'Encrypted {counter+1} times')
-                break
+            testFile.write(message.strip())
+            testFile.write('\n')
             
-            else:
-                if message.startswith("P"):
-                    testFile.write(message.strip()[2:])
-                    testFile.write('\n')
-                if message.startswith("C"):
-                    cipherFile.write(message.strip()[2:])
-                    cipherFile.write('\n')
+            eachLine = serialcomm.read_until()
+            message = eachLine.decode()
+            cipherFile.write(message.strip())
+            cipherFile.write('\n')
+            
+            print(f'Encrypted {counter+1} times')
+            break
+                
+            # eachLine = serialcomm.read_until()
+            # message = eachLine.decode()
+
+            # if message == '\n':
+            #     print(f'Encrypted {counter+1} times')
+            #     break
+            
+            # else:
+            #     if message.startswith("P"):
+            #         testFile.write(message.strip()[2:])
+            #         testFile.write('\n')
+            #     if message.startswith("C"):
+            #         cipherFile.write(message.strip()[2:])
+            #         cipherFile.write('\n')
 
     except KeyboardInterrupt:
         i = 'off'

@@ -20,9 +20,15 @@ def clearFiles():
         
     if os.path.exists('./data/ciphertext.txt'):
         os.remove('./data/ciphertext.txt')
-        
-    shutil.rmtree('./data/traceLines')
-    shutil.rmtree('./data/cleanedTraceLines')
+    
+    try:
+        shutil.rmtree('./data/traceLines')
+    except:
+        print("Folder doesn't exist")
+    try:
+        shutil.rmtree('./data/cleanedTraceLines')
+    except:
+        print("Folder doesn't exist")
     os.mkdir('./data/traceLines')
     os.mkdir('./data/cleanedTraceLines')
         
@@ -43,7 +49,7 @@ def main():
     full_array = []
 
     # How many traces to collect
-    loopCount = 50000
+    loopCount = 2000
 
     # Files to collect plaintext and ciphertext
     plainFile = open('./data/plaintext.txt', 'a+')
@@ -71,28 +77,43 @@ def main():
             serialcomm.flush()
 
             while True:
+                eachLine = serialcomm.read_until()
+                message = eachLine.decode()
+                plainFile.write(message.strip())
+                plainFile.write('\n')
                 
                 eachLine = serialcomm.read_until()
                 message = eachLine.decode()
+                cipherFile.write(message.strip())
+                cipherFile.write('\n')
                 
-                # End of encryption cycle
-                if message == '\n':
-                    ##### Collect one trace #####
-                    _, interpreted_format = lecroy_if.get_native_signal_float(CHANNEL)
-                    thisArray = numpy.asarray(interpreted_format[:])
-                    full_array.append(thisArray)
+                ##### Collect one trace #####
+                _, interpreted_format = lecroy_if.get_native_signal_float(CHANNEL)
+                thisArray = numpy.asarray(interpreted_format[:])
+                full_array.append(thisArray)
+                print(f'Encrypted {counter+1} times')
+                break
+                # eachLine = serialcomm.read_until()
+                # message = eachLine.decode()
+                
+                # # End of encryption cycle
+                # if message == '\n':
+                #     ##### Collect one trace #####
+                #     _, interpreted_format = lecroy_if.get_native_signal_float(CHANNEL)
+                #     thisArray = numpy.asarray(interpreted_format[:])
+                #     full_array.append(thisArray)
                     
-                    print(f'Encrypted {counter+1} times')
-                    break
+                #     print(f'Encrypted {counter+1} times')
+                #     break
                 
-                # Collect data
-                else:
-                    if message.startswith("P"):
-                        plainFile.write(message.strip()[2:])
-                        plainFile.write('\n')
-                    if message.startswith("C"):
-                        cipherFile.write(message.strip()[2:])
-                        cipherFile.write('\n')
+                # # Collect data
+                # else:
+                #     if message.startswith("P"):
+                #         plainFile.write(message.strip()[2:])
+                #         plainFile.write('\n')
+                #     if message.startswith("C"):
+                #         cipherFile.write(message.strip()[2:])
+                #         cipherFile.write('\n')
 
         except KeyboardInterrupt:
             i = 'off'

@@ -26,15 +26,15 @@ AES128 aes128;
 /**********************************************************************/
 
 
-//byte key[16] = {0x2b, 0x7e, 0x15, 0x16,
-//                0x28, 0xae, 0xd2, 0xa6,
-//                0xab, 0xf7, 0x15, 0x88,
-//                0x09, 0xcf, 0x4f, 0x3c};  //AES-128
+byte key[16] = {0x2b, 0x7e, 0x15, 0x16,
+                0x28, 0xae, 0xd2, 0xa6,
+                0xab, 0xf7, 0x15, 0x88,
+                0x09, 0xcf, 0x4f, 0x3c};  //AES-128
 
- byte key[16] = {0x00, 0x01, 0x02, 0x03, 0x04,
-                 0x05, 0x06, 0x07, 0x08,
-                 0x09, 0x0A, 0x0B, 0x0C,
-                 0x0D, 0x0E, 0x0F}; // AES-128 Experimental Key
+// byte key[16] = {0x00, 0x01, 0x02, 0x03, 0x04,
+//                 0x05, 0x06, 0x07, 0x08,
+//                 0x09, 0x0A, 0x0B, 0x0C,
+//                 0x0D, 0x0E, 0x0F}; // AES-128 Experimental Key
 
 // byte key[32] = {0x01, 0x02, 0x03, 0x04,
 //                 0x05, 0x06, 0x07, 0x08,
@@ -96,8 +96,9 @@ void loop() {
             Serial.print(' ');
         }
         Serial.print('\n');
-
-        delay(100);
+        delay(20);
+        noInterrupts();
+        
 
         // Encryption Starts on Pin 11 HIGH
         digitalWrite(11, HIGH);
@@ -106,8 +107,10 @@ void loop() {
 
         // Encryption Ends on Pin 11 LOW
         digitalWrite(11, LOW);
+        
+        interrupts();
         delay(100);
-
+        
         // Print Ciphertext
         Serial.print('C');
         Serial.print(' ');

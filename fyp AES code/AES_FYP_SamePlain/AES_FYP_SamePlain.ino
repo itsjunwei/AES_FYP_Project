@@ -98,7 +98,8 @@ void loop() {
         }
         Serial.print('\n');
 
-        delay(100);
+        noInterrupts();
+        delay(20);
 
         // Encryption Starts on Pin 11 HIGH
         digitalWrite(11, HIGH);
@@ -107,7 +108,8 @@ void loop() {
 
         // Encryption Ends on Pin 11 LOW
         digitalWrite(11, LOW);
-        delay(100);
+        delay(200);
+        interrupts();
 
         // Print Ciphertext
         Serial.print('C');
